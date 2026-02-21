@@ -1,0 +1,8 @@
+[Bb]in/
+[Oo]bj/
+*.swp
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+test_results.txt
