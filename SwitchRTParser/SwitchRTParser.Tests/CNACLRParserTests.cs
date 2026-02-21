@@ -72,5 +72,33 @@ CNACLR
             Assert.Equal("CSC2", result[1].CSCNAME);
             Assert.Equal("CLIN2", result[1].CLIN);
         }
+
+        [Fact]
+        public void Parse_NonConsecutiveColumns_ReturnsExpectedResults()
+        {
+            // CSCName: 1st (index 0)
+            // P: 3rd (index 2)
+            // PFX: 5th (index 4)
+            // CLIN: 9th (index 8)
+            // RSName: 14th (index 13)
+
+            string input = @"
+CNACLR
+------
+ Call source name  Col2  DN set  Col4  Caller number  Col6  Col7  Col8  Call prefix  Col10  Col11  Col12  Col13  Route selection name
+
+ CSC_VAL           C2    P_VAL   C4    PFX_VAL        C6    C7    C8    CLIN_VAL     C10    C11    C12    C13    RSN_VAL
+
+(Number of results = 1)
+";
+            var result = CNACLRParser.Parse(input);
+            Assert.Single(result);
+
+            Assert.Equal("CSC_VAL", result[0].CSCNAME);
+            Assert.Equal("P_VAL", result[0].P);
+            Assert.Equal("PFX_VAL", result[0].PFX);
+            Assert.Equal("CLIN_VAL", result[0].CLIN);
+            Assert.Equal("RSN_VAL", result[0].RSNAME);
+        }
     }
 }

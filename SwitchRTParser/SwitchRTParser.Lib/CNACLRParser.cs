@@ -30,6 +30,15 @@ namespace SwitchRTParser.Lib
 
         private static int ParseTable(string[] lines, int headerIndex, List<SwitchCNACLR> results)
         {
+            string headerLine = lines[headerIndex];
+            var headerParts = SplitLine(headerLine);
+
+            int cscIdx = Array.FindIndex(headerParts, h => h.Equals("Call source name", StringComparison.OrdinalIgnoreCase));
+            int clinIdx = Array.FindIndex(headerParts, h => h.Equals("Call prefix", StringComparison.OrdinalIgnoreCase));
+            int pIdx = Array.FindIndex(headerParts, h => h.Equals("DN set", StringComparison.OrdinalIgnoreCase));
+            int pfxIdx = Array.FindIndex(headerParts, h => h.Equals("Caller number", StringComparison.OrdinalIgnoreCase));
+            int rsIdx = Array.FindIndex(headerParts, h => h.Equals("Route selection name", StringComparison.OrdinalIgnoreCase));
+
             // Skip header and any separator line or empty lines
             int i = headerIndex + 1;
             while (i < lines.Length)
@@ -51,15 +60,19 @@ namespace SwitchRTParser.Lib
                 if (IsEndOfBatch(line)) break;
 
                 var parts = SplitLine(line);
-                if (parts.Length >= 5)
+
+                // Ensure we have at least enough parts to reach the maximum required index
+                int maxIdx = Math.Max(cscIdx, Math.Max(clinIdx, Math.Max(pIdx, Math.Max(pfxIdx, rsIdx))));
+
+                if (parts.Length > 0)
                 {
                     var cnaclr = new SwitchCNACLR
                     {
-                        CSCNAME = parts[0],
-                        CLIN = parts[1],
-                        P = parts[2],
-                        PFX = parts[3],
-                        RSNAME = parts[4]
+                        CSCNAME = cscIdx >= 0 && cscIdx < parts.Length ? parts[cscIdx] : string.Empty,
+                        CLIN = clinIdx >= 0 && clinIdx < parts.Length ? parts[clinIdx] : string.Empty,
+                        P = pIdx >= 0 && pIdx < parts.Length ? parts[pIdx] : string.Empty,
+                        PFX = pfxIdx >= 0 && pfxIdx < parts.Length ? parts[pfxIdx] : string.Empty,
+                        RSNAME = rsIdx >= 0 && rsIdx < parts.Length ? parts[rsIdx] : string.Empty
                     };
                     results.Add(cnaclr);
                 }

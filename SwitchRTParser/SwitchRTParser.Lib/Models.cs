@@ -32,14 +32,4 @@ namespace SwitchRTParser.Lib
         public string PFX { get; set; } = string.Empty;
         public string RSNAME { get; set; } = string.Empty;
     }
-    public class SwitchCNACLD
-    {
-        public string P { get; set; } = string.Empty;
-        public string PFX { get; set; } = string.Empty;
-        public string MINL { get; set; } = string.Empty;
-        public string MAXL { get; set; } = string.Empty;
-        public string SDESCRIPTION { get; set; } = string.Empty;
-        public string SN { get; set; } = string.Empty;
-        public string CLIANA { get; set; } = string.Empty;
-    }
 }
