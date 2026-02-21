@@ -24,6 +24,14 @@ namespace SwitchRTParser.Lib
         public string RTSM { get; set; } = string.Empty;
     }
 
+    public class SwitchCNACLR
+    {
+        public string CSCNAME { get; set; } = string.Empty;
+        public string CLIN { get; set; } = string.Empty;
+        public string P { get; set; } = string.Empty;
+        public string PFX { get; set; } = string.Empty;
+        public string RSNAME { get; set; } = string.Empty;
+    }
     public class SwitchCNACLD
     {
         public string P { get; set; } = string.Empty;
