@@ -69,7 +69,8 @@ namespace SwitchRTParser.Lib
                     result.SubRoutes.Add(new SubRoute
                     {
                         Name = name,
-                        Percentage = subRoutePercentages[i]
+                        Percentage = subRoutePercentages[i],
+                        Index = i
                     });
                 }
             }
