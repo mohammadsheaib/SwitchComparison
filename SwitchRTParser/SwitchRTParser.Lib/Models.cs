@@ -16,4 +16,11 @@ namespace SwitchRTParser.Lib
         public int Percentage { get; set; }
         public int Index { get; set; }
     }
+
+    public class SwitchRTANA
+    {
+        public string RSN { get; set; } = string.Empty;
+        public string RN { get; set; } = string.Empty;
+        public string RTSM { get; set; } = string.Empty;
+    }
 }
