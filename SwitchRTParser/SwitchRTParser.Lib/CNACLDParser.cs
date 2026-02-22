@@ -10,7 +10,7 @@ namespace SwitchRTParser.Lib
         public static List<SwitchCNACLD> Parse(string input)
         {
             var callPrefixData = new List<CallPrefixEntry>();
-            var routeSelectionData = new Dictionary<string, RouteSelectionEntry>(StringComparer.OrdinalIgnoreCase);
+            var routeSelectionData = new Dictionary<(string P, string PFX), RouteSelectionEntry>();
 
             var lines = input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
@@ -39,7 +39,7 @@ namespace SwitchRTParser.Lib
                     MAXL = cp.MAXL
                 };
 
-                if (routeSelectionData.TryGetValue(cnacld.P, out var rs))
+                if (routeSelectionData.TryGetValue((cnacld.P, cnacld.PFX), out var rs))
                 {
                     cnacld.SDESCRIPTION = rs.SDESCRIPTION;
                     cnacld.SN = rs.SN;
@@ -93,7 +93,7 @@ namespace SwitchRTParser.Lib
             return i;
         }
 
-        private static int ParseRouteSelectionData(string[] lines, int startIndex, Dictionary<string, RouteSelectionEntry> routeSelectionData)
+        private static int ParseRouteSelectionData(string[] lines, int startIndex, Dictionary<(string P, string PFX), RouteSelectionEntry> routeSelectionData)
         {
             int i = SkipToData(lines, startIndex);
 
@@ -106,15 +106,17 @@ namespace SwitchRTParser.Lib
                 if (parts.Length >= 16)
                 {
                     string p = parts[0];
+                    string pfx = parts[1];
                     var entry = new RouteSelectionEntry
                     {
                         SDESCRIPTION = parts[8], // field number 9
                         CLIANA = parts[15]       // field number 16
                     };
 
-                    if (!routeSelectionData.ContainsKey(p))
+                    var key = (p, pfx);
+                    if (!routeSelectionData.ContainsKey(key))
                     {
-                        routeSelectionData[p] = entry;
+                        routeSelectionData[key] = entry;
                     }
                 }
                 i++;
