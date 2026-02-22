@@ -14,7 +14,8 @@ namespace SwitchRTParser.Lib
 
             var lines = input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
-            for (int i = 0; i < lines.Length; i++)
+            int i = 0;
+            while (i < lines.Length)
             {
                 string line = lines[i].Trim();
 
@@ -25,6 +26,10 @@ namespace SwitchRTParser.Lib
                 else if (line.StartsWith("Route selection data", StringComparison.OrdinalIgnoreCase))
                 {
                     i = ParseRouteSelectionData(lines, i + 1, routeSelectionData);
+                }
+                else
+                {
+                    i++;
                 }
             }
 
@@ -76,6 +81,11 @@ namespace SwitchRTParser.Lib
             while (i < lines.Length)
             {
                 string line = lines[i];
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    i++;
+                    continue;
+                }
                 if (IsEndOfBatch(line)) break;
 
                 var parts = SplitLine(line);
@@ -100,6 +110,11 @@ namespace SwitchRTParser.Lib
             while (i < lines.Length)
             {
                 string line = lines[i];
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    i++;
+                    continue;
+                }
                 if (IsEndOfBatch(line)) break;
 
                 var parts = SplitLine(line);
@@ -127,7 +142,6 @@ namespace SwitchRTParser.Lib
         private static bool IsEndOfBatch(string line)
         {
             string trimmed = line.Trim();
-            if (string.IsNullOrWhiteSpace(trimmed)) return true;
             if (trimmed.StartsWith("To be continued...", StringComparison.OrdinalIgnoreCase)) return true;
             if (trimmed.StartsWith("(Number of results =", StringComparison.OrdinalIgnoreCase)) return true;
             if (trimmed.StartsWith("---", StringComparison.OrdinalIgnoreCase)) return true;

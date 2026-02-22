@@ -15,12 +15,14 @@ Call prefix data
 ----------------
  DN set  Call prefix  F3  F4  F5  Minimum number length  Maximum number length
  9       000255       X   X   X   10                     32
+
  10      000256       X   X   X   11                     33
 
 Route selection data
 --------------------
  DN set  Call prefix  F3  F4  F5  F6  F7  F8  Description         F10  F11  F12  F13  F14  F15  Caller number and route selection name analysis flag
  9       000255       X   X   X   X   X   X   DEST_SWEDEN_LYCA    X    X    X    X    X    X    TRUE
+
  10      000256       X   X   X   X   X   X   DEST_UK_O2          X    X    X    X    X    X    FALSE
 ";
             var result = CNACLDParser.Parse(input);
@@ -56,6 +58,7 @@ Route selection data
 --------------------
  DN set  Call prefix  F3  F4  F5  F6  F7  F8  Description         F10  F11  F12  F13  F14  F15  Caller number and route selection name analysis flag
  9       000255       X   X   X   X   X   X   DESC_A              X    X    X    X    X    X    TRUE
+
  9       000256       X   X   X   X   X   X   DESC_B              X    X    X    X    X    X    FALSE
 ";
             var result = CNACLDParser.Parse(input);
