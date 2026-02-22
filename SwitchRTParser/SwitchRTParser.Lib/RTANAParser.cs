@@ -19,7 +19,8 @@ namespace SwitchRTParser.Lib
                 string line = lines[i].Trim();
 
                 // Look for the header row to start parsing
-                if (line.Contains("Route selection name") && line.Contains("Sub-route selection mode"))
+                if (line.Contains("Route selection name", StringComparison.OrdinalIgnoreCase) &&
+                    line.Contains("Route selection mode", StringComparison.OrdinalIgnoreCase))
                 {
                     i = ParseTable(lines, i, results);
                 }
@@ -30,12 +31,24 @@ namespace SwitchRTParser.Lib
 
         private static int ParseTable(string[] lines, int headerIndex, List<SwitchRTANA> results)
         {
+            string headerLine = lines[headerIndex];
+            var headerParts = SplitLine(headerLine);
+
+            int rsnIndex = Array.FindIndex(headerParts, p => p.Equals("Route selection name", StringComparison.OrdinalIgnoreCase));
+            int rtsmIndex = Array.FindIndex(headerParts, p => p.Equals("Route selection mode", StringComparison.OrdinalIgnoreCase));
+            int rnIndex = Array.FindIndex(headerParts, p => p.Equals("Route 1 name", StringComparison.OrdinalIgnoreCase));
+
+            // Fallback if header names don't match exactly but we know the expected positions from user
+            if (rsnIndex == -1) rsnIndex = 0;
+            if (rtsmIndex == -1) rtsmIndex = 8;
+            if (rnIndex == -1) rnIndex = 9;
+
             // Skip header and any separator line or empty lines
             int i = headerIndex + 1;
             while (i < lines.Length)
             {
                 string trimmed = lines[i].Trim();
-                if (string.IsNullOrWhiteSpace(trimmed) || trimmed.Contains("---") || trimmed.Contains("Route selection name"))
+                if (string.IsNullOrWhiteSpace(trimmed) || trimmed.Contains("---") || trimmed.Contains("Route selection name", StringComparison.OrdinalIgnoreCase))
                 {
                     i++;
                 }
@@ -51,13 +64,13 @@ namespace SwitchRTParser.Lib
                 if (IsEndOfBatch(line)) break;
 
                 var parts = SplitLine(line);
-                if (parts.Length >= 3)
+                if (parts.Length > Math.Max(rsnIndex, Math.Max(rtsmIndex, rnIndex)))
                 {
                     var rtana = new SwitchRTANA
                     {
-                        RSN = parts[0],
-                        RTSM = MapRTSM(parts[1]),
-                        RN = parts[2]
+                        RSN = parts[rsnIndex],
+                        RTSM = MapRTSM(parts[rtsmIndex]),
+                        RN = parts[rnIndex]
                     };
                     results.Add(rtana);
                 }

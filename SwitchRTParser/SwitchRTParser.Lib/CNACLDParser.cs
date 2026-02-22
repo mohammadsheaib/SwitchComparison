@@ -10,11 +10,12 @@ namespace SwitchRTParser.Lib
         public static List<SwitchCNACLD> Parse(string input)
         {
             var callPrefixData = new List<CallPrefixEntry>();
-            var routeSelectionData = new Dictionary<string, RouteSelectionEntry>(StringComparer.OrdinalIgnoreCase);
+            var routeSelectionData = new Dictionary<(string P, string PFX), RouteSelectionEntry>();
 
             var lines = input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
-            for (int i = 0; i < lines.Length; i++)
+            int i = 0;
+            while (i < lines.Length)
             {
                 string line = lines[i].Trim();
 
@@ -25,6 +26,10 @@ namespace SwitchRTParser.Lib
                 else if (line.StartsWith("Route selection data", StringComparison.OrdinalIgnoreCase))
                 {
                     i = ParseRouteSelectionData(lines, i + 1, routeSelectionData);
+                }
+                else
+                {
+                    i++;
                 }
             }
 
@@ -39,7 +44,7 @@ namespace SwitchRTParser.Lib
                     MAXL = cp.MAXL
                 };
 
-                if (routeSelectionData.TryGetValue(cnacld.P, out var rs))
+                if (routeSelectionData.TryGetValue((cnacld.P, cnacld.PFX), out var rs))
                 {
                     cnacld.SDESCRIPTION = rs.SDESCRIPTION;
                     cnacld.SN = rs.SN;
@@ -76,16 +81,22 @@ namespace SwitchRTParser.Lib
             while (i < lines.Length)
             {
                 string line = lines[i];
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    i++;
+                    continue;
+                }
                 if (IsEndOfBatch(line)) break;
 
                 var parts = SplitLine(line);
-                if (parts.Length >= 4)
+                if (parts.Length >= 7)
                 {
-                    callPrefixData.Add(new CallPrefixEntry {
+                    callPrefixData.Add(new CallPrefixEntry
+                    {
                         P = parts[0],
                         PFX = parts[1],
-                        MINL = parts[2],
-                        MAXL = parts[3]
+                        MINL = parts[5], // field number 6
+                        MAXL = parts[6]  // field number 7
                     });
                 }
                 i++;
@@ -93,52 +104,35 @@ namespace SwitchRTParser.Lib
             return i;
         }
 
-        private static int ParseRouteSelectionData(string[] lines, int startIndex, Dictionary<string, RouteSelectionEntry> routeSelectionData)
+        private static int ParseRouteSelectionData(string[] lines, int startIndex, Dictionary<(string P, string PFX), RouteSelectionEntry> routeSelectionData)
         {
-            // Find header row to check for "Server name"
-            bool hasSN = false;
-            for (int k = startIndex; k < lines.Length && k < startIndex + 5; k++)
-            {
-                if (lines[k].Contains("DN set", StringComparison.OrdinalIgnoreCase) &&
-                    lines[k].Contains("Description", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (lines[k].Contains("Server name", StringComparison.OrdinalIgnoreCase))
-                    {
-                        hasSN = true;
-                    }
-                    break;
-                }
-            }
-
             int i = SkipToData(lines, startIndex);
 
             while (i < lines.Length)
             {
                 string line = lines[i];
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    i++;
+                    continue;
+                }
                 if (IsEndOfBatch(line)) break;
 
                 var parts = SplitLine(line);
-                if (parts.Length >= 2)
+                if (parts.Length >= 16)
                 {
                     string p = parts[0];
+                    string pfx = parts[1];
                     var entry = new RouteSelectionEntry
                     {
-                        SDESCRIPTION = parts[1]
+                        SDESCRIPTION = parts[8], // field number 9
+                        CLIANA = parts[15]       // field number 16
                     };
 
-                    if (hasSN)
+                    var key = (p, pfx);
+                    if (!routeSelectionData.ContainsKey(key))
                     {
-                        if (parts.Length >= 3) entry.SN = parts[2];
-                        if (parts.Length >= 4) entry.CLIANA = parts[3];
-                    }
-                    else
-                    {
-                        if (parts.Length >= 3) entry.CLIANA = parts[2];
-                    }
-
-                    if (!routeSelectionData.ContainsKey(p))
-                    {
-                        routeSelectionData[p] = entry;
+                        routeSelectionData[key] = entry;
                     }
                 }
                 i++;
@@ -149,7 +143,6 @@ namespace SwitchRTParser.Lib
         private static bool IsEndOfBatch(string line)
         {
             string trimmed = line.Trim();
-            if (string.IsNullOrWhiteSpace(trimmed)) return true;
             if (trimmed.StartsWith("To be continued...", StringComparison.OrdinalIgnoreCase)) return true;
             if (trimmed.StartsWith("(Number of results =", StringComparison.OrdinalIgnoreCase)) return true;
             if (trimmed.StartsWith("---", StringComparison.OrdinalIgnoreCase)) return true;

@@ -39,6 +39,7 @@ namespace SwitchRTParser.Lib
             {
                 rt.SubRoutes = rt.SubRoutes.OrderBy(s => s.Index).ToList();
             }
+
             return result;
         }
 
