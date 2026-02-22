@@ -79,13 +79,13 @@ namespace SwitchRTParser.Lib
                 if (IsEndOfBatch(line)) break;
 
                 var parts = SplitLine(line);
-                if (parts.Length >= 4)
+                if (parts.Length >= 7)
                 {
                     callPrefixData.Add(new CallPrefixEntry {
                         P = parts[0],
                         PFX = parts[1],
-                        MINL = parts[2],
-                        MAXL = parts[3]
+                        MINL = parts[5], // field number 6
+                        MAXL = parts[6]  // field number 7
                     });
                 }
                 i++;
@@ -95,21 +95,6 @@ namespace SwitchRTParser.Lib
 
         private static int ParseRouteSelectionData(string[] lines, int startIndex, Dictionary<string, RouteSelectionEntry> routeSelectionData)
         {
-            // Find header row to check for "Server name"
-            bool hasSN = false;
-            for (int k = startIndex; k < lines.Length && k < startIndex + 5; k++)
-            {
-                if (lines[k].Contains("DN set", StringComparison.OrdinalIgnoreCase) &&
-                    lines[k].Contains("Description", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (lines[k].Contains("Server name", StringComparison.OrdinalIgnoreCase))
-                    {
-                        hasSN = true;
-                    }
-                    break;
-                }
-            }
-
             int i = SkipToData(lines, startIndex);
 
             while (i < lines.Length)
@@ -118,23 +103,14 @@ namespace SwitchRTParser.Lib
                 if (IsEndOfBatch(line)) break;
 
                 var parts = SplitLine(line);
-                if (parts.Length >= 2)
+                if (parts.Length >= 16)
                 {
                     string p = parts[0];
                     var entry = new RouteSelectionEntry
                     {
-                        SDESCRIPTION = parts[1]
+                        SDESCRIPTION = parts[8], // field number 9
+                        CLIANA = parts[15]       // field number 16
                     };
-
-                    if (hasSN)
-                    {
-                        if (parts.Length >= 3) entry.SN = parts[2];
-                        if (parts.Length >= 4) entry.CLIANA = parts[3];
-                    }
-                    else
-                    {
-                        if (parts.Length >= 3) entry.CLIANA = parts[2];
-                    }
 
                     if (!routeSelectionData.ContainsKey(p))
                     {

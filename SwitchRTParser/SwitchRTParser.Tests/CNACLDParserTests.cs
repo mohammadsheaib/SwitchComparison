@@ -13,15 +13,15 @@ namespace SwitchRTParser.Tests
             string input = @"
 Call prefix data
 ----------------
- DN set  Call prefix  Minimum number length  Maximum number length
- 9       000255       10                     32
- 10      000256       11                     33
+ DN set  Call prefix  F3  F4  F5  Minimum number length  Maximum number length
+ 9       000255       X   X   X   10                     32
+ 10      000256       X   X   X   11                     33
 
 Route selection data
 --------------------
- DN set  Description         Server name  Caller number and route selection name analysis flag
- 9       DEST_SWEDEN_LYCA    SCC          TRUE
- 10      DEST_UK_O2          SCC          FALSE
+ DN set  F2  F3  F4  F5  F6  F7  F8  Description         F10  F11  F12  F13  F14  F15  Caller number and route selection name analysis flag
+ 9       X   X   X   X   X   X   X   DEST_SWEDEN_LYCA    X    X    X    X    X    X    TRUE
+ 10      X   X   X   X   X   X   X   DEST_UK_O2          X    X    X    X    X    X    FALSE
 ";
             var result = CNACLDParser.Parse(input);
 
@@ -33,7 +33,6 @@ Route selection data
             Assert.Equal("10", first.MINL);
             Assert.Equal("32", first.MAXL);
             Assert.Equal("DEST_SWEDEN_LYCA", first.SDESCRIPTION);
-            Assert.Equal("SCC", first.SN);
             Assert.Equal("TRUE", first.CLIANA);
 
             var second = result.FirstOrDefault(r => r.P == "10");
@@ -42,32 +41,7 @@ Route selection data
             Assert.Equal("11", second.MINL);
             Assert.Equal("33", second.MAXL);
             Assert.Equal("DEST_UK_O2", second.SDESCRIPTION);
-            Assert.Equal("SCC", second.SN);
             Assert.Equal("FALSE", second.CLIANA);
-        }
-
-        [Fact]
-        public void Parse_MissingSN_ReturnsExpectedData()
-        {
-            string input = @"
-Call prefix data
-----------------
- DN set  Call prefix  Minimum number length  Maximum number length
- 9       000255       10                     32
-
-Route selection data
---------------------
- DN set  Description         Caller number and route selection name analysis flag
- 9       DEST_SWEDEN_LYCA    TRUE
-";
-            var result = CNACLDParser.Parse(input);
-
-            Assert.Single(result);
-            var first = result[0];
-            Assert.Equal("9", first.P);
-            Assert.Equal("DEST_SWEDEN_LYCA", first.SDESCRIPTION);
-            Assert.Equal("", first.SN);
-            Assert.Equal("TRUE", first.CLIANA);
         }
 
         [Fact]
@@ -76,27 +50,27 @@ Route selection data
             string input = @"
 Call prefix data
 ----------------
- DN set  Call prefix  Minimum number length  Maximum number length
- 1       001          10                     20
+ DN set  Call prefix  F3  F4  F5  Minimum number length  Maximum number length
+ 1       001          X   X   X   10                     20
 
 To be continued...
 
 Call prefix data
 ----------------
- DN set  Call prefix  Minimum number length  Maximum number length
- 2       002          10                     20
+ DN set  Call prefix  F3  F4  F5  Minimum number length  Maximum number length
+ 2       002          X   X   X   10                     20
 
 Route selection data
 --------------------
- DN set  Description         Server name  Caller number and route selection name analysis flag
- 1       DESC1               SCC          TRUE
+ DN set  F2  F3  F4  F5  F6  F7  F8  Description         F10  F11  F12  F13  F14  F15  Caller number and route selection name analysis flag
+ 1       X   X   X   X   X   X   X   DESC1               X    X    X    X    X    X    TRUE
 
 To be continued...
 
 Route selection data
 --------------------
- DN set  Description         Server name  Caller number and route selection name analysis flag
- 2       DESC2               SCC          FALSE
+ DN set  F2  F3  F4  F5  F6  F7  F8  Description         F10  F11  F12  F13  F14  F15  Caller number and route selection name analysis flag
+ 2       X   X   X   X   X   X   X   DESC2               X    X    X    X    X    X    FALSE
 ";
             var result = CNACLDParser.Parse(input);
 
