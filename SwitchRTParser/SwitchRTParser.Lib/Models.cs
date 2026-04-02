@@ -10,6 +10,13 @@ namespace SwitchRTParser.Lib
         public string SN { get; set; } = string.Empty;
     }
 
+    public class ComparisonTrunk
+    {
+        public string TrunkName { get; set; } = string.Empty;
+        public bool IsInActivated { get; set; }
+        public bool IsOutActivated { get; set; }
+    }
+
     public class SubRoute
     {
         public string Name { get; set; } = string.Empty;
